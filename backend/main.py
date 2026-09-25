@@ -12,7 +12,7 @@ app = FastAPI(
 )
 
 
-# verifica que la api se encuentre activa
+# verifica el estado de la api
 @app.get("/health")
 def health_check():
     return {

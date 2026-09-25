@@ -6,21 +6,17 @@ from psycopg.rows import dict_row
 from backend.config import DATABASE_CONFIG
 
 
-# crea una conexion temporal con postgresql
+# crea y administra una conexion con postgresql
 @contextmanager
 def get_connection():
-    connection = psycopg.connect(
+    with psycopg.connect(
         **DATABASE_CONFIG,
         row_factory=dict_row,
-    )
-
-    try:
+    ) as connection:
         yield connection
-    finally:
-        connection.close()
 
 
-# verifica que postgresql responda correctamente
+# verifica la conexion con postgresql
 def check_database_connection() -> bool:
     with get_connection() as connection:
         with connection.cursor() as cursor:
