@@ -2,42 +2,34 @@ import psycopg
 from fastapi import FastAPI, HTTPException
 
 from backend.database import check_database_connection
+from backend.mongodb import mongo_lifespan
+from backend.routes.community import router as community_router
 from backend.routes.products import router as products_router
 
-
-# crea la aplicacion principal
 app = FastAPI(
     title="Arkham Books API",
-    version="1.0.0",
+    description="Bookstore catalog and reader community services",
+    version="2.0.0",
+    lifespan=mongo_lifespan,
 )
 
 
-# verifica el estado de la api
-@app.get("/health")
+@app.get("/health", tags=["health"])
 def health_check():
-    return {
-        "status": "ok",
-        "service": "arkham-books-api",
-    }
+    return {"status": "ok", "service": "arkham-books-api"}
 
 
-# verifica la conexion con postgresql
-@app.get("/health/database")
+@app.get("/health/database", tags=["health"])
 def database_health_check():
     try:
         check_database_connection()
-
-        return {
-            "status": "ok",
-            "database": "connected",
-        }
-
+        return {"status": "ok", "database": "postgresql"}
     except psycopg.Error as error:
         raise HTTPException(
             status_code=503,
-            detail="Database connection failed",
+            detail="PostgreSQL connection failed",
         ) from error
 
 
-# registra las rutas de productos
 app.include_router(products_router)
+app.include_router(community_router)
