@@ -1,3 +1,4 @@
+import html
 import os
 from datetime import datetime
 
@@ -101,9 +102,9 @@ def cover_for(title, index):
 
 def render_post(post):
     author_id = post.get("author_id", "Lector")
-    content = post.get("content", "")
+    content = html.escape(post.get("content", ""))
     kind = post.get("kind", "post").replace("_", " ").title()
-    book = post.get("book_title")
+    book = html.escape(post.get("book_title") or "")
     created = post.get("created_at", "")
     try:
         created = datetime.fromisoformat(created.replace("Z", "+00:00")).strftime("%d/%m/%Y · %H:%M")
