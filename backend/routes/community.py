@@ -5,6 +5,7 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from pymongo.errors import DuplicateKeyError, PyMongoError
+from starlette.concurrency import run_in_threadpool
 
 from backend.database import get_connection
 
@@ -92,7 +93,7 @@ async def get_feed(
 
 @router.post("/posts", status_code=201)
 async def create_post(payload: PostInput, request: Request):
-    ensure_user_exists(payload.author_id)
+    await run_in_threadpool(ensure_user_exists, payload.author_id)
     database = get_mongo(request)
     document = {
         "author_id": payload.author_id,
@@ -142,7 +143,7 @@ async def create_comment(post_id: str, payload: CommentInput, request: Request):
 async def set_reaction(post_id: str, payload: ReactionInput, request: Request):
     if not ObjectId.is_valid(post_id):
         raise HTTPException(status_code=400, detail="Invalid post ID")
-    ensure_user_exists(payload.user_id)
+    await run_in_threadpool(ensure_user_exists, payload.user_id)
     database = get_mongo(request)
     if await database.posts.find_one({"_id": ObjectId(post_id)}) is None:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -169,8 +170,8 @@ async def remove_reaction(post_id: str, user_id: int, request: Request):
 async def follow_user(payload: FollowInput, request: Request):
     if payload.follower_id == payload.followed_id:
         raise HTTPException(status_code=400, detail="A user cannot follow themselves")
-    ensure_user_exists(payload.follower_id)
-    ensure_user_exists(payload.followed_id)
+    await run_in_threadpool(ensure_user_exists, payload.follower_id)
+    await run_in_threadpool(ensure_user_exists, payload.followed_id)
     database = get_mongo(request)
     try:
         await database.follows.insert_one({
