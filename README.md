@@ -21,6 +21,7 @@ Bookstore and reader community application for PC3.
 ```bash
 git clone https://github.com/Roly-Luna/arkham-books-app.git
 cd arkham-books-app
+uv lock
 uv sync
 cp .env.example .env
 ```
