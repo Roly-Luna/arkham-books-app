@@ -3,7 +3,7 @@ name = "arkham-books-app"
 version = "0.2.0"
 description = "Bookstore catalog and reader community application"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.115.0",
     "psycopg[binary]>=3.2.0",
